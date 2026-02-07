@@ -16,6 +16,10 @@ Charts: Chart.js
 Logic: Vanilla JavaScript (Adaptive Scheduling Algorithm)
 📝 How to Use
 Login: Enter your college email and a secure password to access your personal hub.
+
+https://github.com/user-attachments/assets/e57627e1-b58a-4807-bd9b-f355921b5d3a
+
+
 Add Subjects: Input your current semester subjects, their credits, and your current confidence level.
 Generate Plan: Let the AI create your adaptive timeline based on your target completion date.
 Deep Work: Use the Pomodoro timer to maintain focus during intense technical subjects.
