@@ -1,0 +1,3463 @@
+<!DOCTYPE html> 
+
+<html lang="en"> 
+
+<head> 
+
+    <meta charset="UTF-8"> 
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+
+    <title>EngiMind AI - Smart Engineering Study Planner</title> 
+
+     
+
+    <!-- Tailwind CSS --> 
+
+    <script src="https://cdn.tailwindcss.com"></script> 
+
+     
+
+    <!-- Three.js --> 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script> 
+
+ 
+
+    <!-- GSAP --> 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script> 
+
+     
+
+    <!-- Chart.js --> 
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script> 
+
+     
+
+    <style> 
+
+        * { 
+
+            margin: 0; 
+
+            padding: 0; 
+
+            box-sizing: border-box; 
+
+        } 
+
+ 
+
+        body { 
+
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+
+            overflow-x: hidden; 
+
+            background: #050505; 
+
+        } 
+
+ 
+
+        #canvas-container { 
+
+            position: fixed; 
+
+            top: 0; 
+
+            left: 0; 
+
+            width: 100%; 
+
+            height: 100%; 
+
+            z-index: 0; 
+
+        } 
+
+ 
+
+        .glass { 
+
+            background: rgba(255, 255, 255, 0.06); 
+
+            backdrop-filter: blur(25px); 
+
+            border: 1px solid rgba(255, 255, 255, 0.12); 
+
+            border-radius: 20px; 
+
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4); 
+
+        } 
+
+ 
+
+        .glass-strong { 
+
+            background: rgba(255, 255, 255, 0.09); 
+
+            backdrop-filter: blur(30px); 
+
+            border: 1px solid rgba(255, 255, 255, 0.18); 
+
+        } 
+
+ 
+
+        .gradient-text { 
+
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+
+            -webkit-background-clip: text; 
+
+            -webkit-text-fill-color: transparent; 
+
+            background-clip: text; 
+
+        } 
+
+ 
+
+        .gradient-bg { 
+
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+
+        } 
+
+ 
+
+        input, select, textarea { 
+
+            background: rgba(255, 255, 255, 0.06); 
+
+            border: 1px solid rgba(255, 255, 255, 0.12); 
+
+            color: white; 
+
+            padding: 12px 16px; 
+
+            border-radius: 12px; 
+
+            outline: none; 
+
+            transition: all 0.3s ease; 
+
+        } 
+
+ 
+
+        input::placeholder, textarea::placeholder { 
+
+            color: rgba(255, 255, 255, 0.4); 
+
+        } 
+
+ 
+
+        input:focus, select:focus, textarea:focus { 
+
+            background: rgba(255, 255, 255, 0.09); 
+
+            border-color: #667eea; 
+
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); 
+
+        } 
+
+ 
+
+        .btn-primary { 
+
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+
+            color: white; 
+
+            padding: 12px 28px; 
+
+            border-radius: 12px; 
+
+            border: none; 
+
+            cursor: pointer; 
+
+            font-weight: 600; 
+
+            transition: all 0.3s ease; 
+
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); 
+
+        } 
+
+ 
+
+        .btn-primary:hover { 
+
+            transform: translateY(-2px); 
+
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6); 
+
+        } 
+
+ 
+
+        .btn-secondary { 
+
+            background: rgba(255, 255, 255, 0.08); 
+
+            color: white; 
+
+            padding: 10px 24px; 
+
+            border-radius: 12px; 
+
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+
+            cursor: pointer; 
+
+            font-weight: 600; 
+
+            transition: all 0.3s ease; 
+
+            font-size: 0.9rem; 
+
+        } 
+
+ 
+
+        .btn-secondary:hover { 
+
+            background: rgba(255, 255, 255, 0.12); 
+
+            transform: translateY(-2px); 
+
+        } 
+
+ 
+
+        .tab-button { 
+
+            padding: 12px 24px; 
+
+            background: transparent; 
+
+            border: none; 
+
+            color: rgba(255, 255, 255, 0.6); 
+
+            cursor: pointer; 
+
+            transition: all 0.3s ease; 
+
+            border-bottom: 2px solid transparent; 
+
+            font-weight: 500; 
+
+        } 
+
+ 
+
+        .tab-button.active { 
+
+            color: white; 
+
+            border-bottom-color: #667eea; 
+
+            background: rgba(102, 126, 234, 0.1); 
+
+        } 
+
+ 
+
+        .tab-button:hover { 
+
+            color: white; 
+
+            background: rgba(255, 255, 255, 0.05); 
+
+        } 
+
+ 
+
+        .priority-high { border-left: 4px solid #ef4444; } 
+
+        .priority-medium { border-left: 4px solid #f59e0b; } 
+
+        .priority-low { border-left: 4px solid #10b981; } 
+
+ 
+
+        .stat-card { 
+
+            transition: all 0.3s ease; 
+
+        } 
+
+ 
+
+        .stat-card:hover { 
+
+            transform: translateY(-4px); 
+
+        } 
+
+ 
+
+        .chart-container { 
+
+            position: relative; 
+
+            height: 240px; 
+
+            width: 100%; 
+
+        } 
+
+ 
+
+        /* Modal Styles */ 
+
+        .modal { 
+
+            display: none; 
+
+            position: fixed; 
+
+            top: 0; 
+
+            left: 0; 
+
+            width: 100%; 
+
+            height: 100%; 
+
+            background: rgba(0, 0, 0, 0.8); 
+
+            z-index: 2000; 
+
+            align-items: center; 
+
+            justify-content: center; 
+
+            backdrop-filter: blur(10px); 
+
+        } 
+
+ 
+
+        .modal.active { 
+
+            display: flex; 
+
+        } 
+
+ 
+
+        .modal-content { 
+
+            background: rgba(20, 20, 20, 0.95); 
+
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+
+            border-radius: 20px; 
+
+            padding: 32px; 
+
+            max-width: 500px; 
+
+            width: 90%; 
+
+            max-height: 90vh; 
+
+            overflow-y: auto; 
+
+            animation: modalSlideIn 0.3s ease-out; 
+
+        } 
+
+ 
+
+        @keyframes modalSlideIn { 
+
+            from { 
+
+                opacity: 0; 
+
+                transform: translateY(-50px); 
+
+            } 
+
+            to { 
+
+                opacity: 1; 
+
+                transform: translateY(0); 
+
+            } 
+
+        } 
+
+ 
+
+        .timer-display { 
+
+            font-size: 4rem; 
+
+            font-weight: 700; 
+
+            font-variant-numeric: tabular-nums; 
+
+        } 
+
+ 
+
+        .progress-ring { 
+
+            transform: rotate(-90deg); 
+
+        } 
+
+ 
+
+        .progress-ring-circle { 
+
+            transition: stroke-dashoffset 0.35s; 
+
+            transform-origin: 50% 50%; 
+
+        } 
+
+ 
+
+        .profile-badge { 
+
+            background: rgba(102, 126, 234, 0.2); 
+
+            border: 1px solid rgba(102, 126, 234, 0.3); 
+
+            padding: 8px 16px; 
+
+            border-radius: 20px; 
+
+            font-size: 0.85rem; 
+
+        } 
+
+ 
+
+        .save-indicator { 
+
+            position: fixed; 
+
+            top: 20px; 
+
+            right: 20px; 
+
+            z-index: 1000; 
+
+            padding: 12px 20px; 
+
+            background: rgba(16, 185, 129, 0.9); 
+
+            backdrop-filter: blur(10px); 
+
+            border-radius: 12px; 
+
+            color: white; 
+
+            font-weight: 600; 
+
+            opacity: 0; 
+
+            transform: translateY(-20px); 
+
+            transition: all 0.3s ease; 
+
+        } 
+
+ 
+
+        .save-indicator.show { 
+
+            opacity: 1; 
+
+            transform: translateY(0); 
+
+        } 
+
+ 
+
+        .action-card { 
+
+            background: rgba(102, 126, 234, 0.1); 
+
+            border-left: 3px solid #667eea; 
+
+            padding: 16px; 
+
+            border-radius: 12px; 
+
+            transition: all 0.3s ease; 
+
+        } 
+
+ 
+
+        .action-card:hover { 
+
+            background: rgba(102, 126, 234, 0.15); 
+
+            transform: translateX(5px); 
+
+        } 
+
+ 
+
+        .error-text { 
+
+            color: #ef4444; 
+
+            font-size: 0.875rem; 
+
+            margin-top: 4px; 
+
+        } 
+
+ 
+
+        ::-webkit-scrollbar { 
+
+            width: 8px; 
+
+        } 
+
+ 
+
+        ::-webkit-scrollbar-track { 
+
+            background: rgba(255, 255, 255, 0.05); 
+
+        } 
+
+ 
+
+        ::-webkit-scrollbar-thumb { 
+
+            background: rgba(102, 126, 234, 0.5); 
+
+            border-radius: 4px; 
+
+        } 
+
+ 
+
+        .subject-item { 
+
+            transition: all 0.3s ease; 
+
+        } 
+
+ 
+
+        .subject-item:hover { 
+
+            transform: translateX(8px); 
+
+        } 
+
+ 
+
+        @keyframes fadeInUp { 
+
+            from { 
+
+                opacity: 0; 
+
+                transform: translateY(30px); 
+
+            } 
+
+            to { 
+
+                opacity: 1; 
+
+                transform: translateY(0); 
+
+            } 
+
+        } 
+
+ 
+
+        .fade-in-up { 
+
+            animation: fadeInUp 0.6s ease-out; 
+
+        } 
+
+ 
+
+        @media (max-width: 768px) { 
+
+            .timer-display { 
+
+                font-size: 2.5rem; 
+
+            } 
+
+             
+
+            .chart-container { 
+
+                height: 200px; 
+
+            } 
+
+        } 
+
+    </style> 
+
+</head> 
+
+<body class="text-white"> 
+
+    <!-- 3D Canvas Background --> 
+
+    <div id="canvas-container"></div> 
+
+ 
+
+    <!-- Save Indicator --> 
+
+    <div id="saveIndicator" class="save-indicator"> 
+
+        ✓ Progress Saved Successfully 
+
+    </div> 
+
+ 
+
+    <!-- Login Screen --> 
+
+    <div id="loginScreen" class="relative z-10 min-h-screen flex items-center justify-center p-4"> 
+
+        <div class="glass p-10 max-w-md w-full"> 
+
+            <div class="text-center mb-8"> 
+
+                <div class="w-20 h-20 gradient-bg rounded-full mx-auto mb-4 flex items-center justify-center"> 
+
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"> 
+
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path> 
+
+                    </svg> 
+
+                </div> 
+
+                <h1 class="text-5xl font-bold gradient-text mb-2">EngiMind AI</h1> 
+
+                <p class="text-gray-400">Smart Engineering Study Assistant</p> 
+
+            </div> 
+
+             
+
+            <div class="space-y-4"> 
+
+                <div> 
+
+                    <label class="block mb-2 text-sm text-gray-300">College Email ID</label> 
+
+                    <input type="email"  
+
+                           id="loginEmail"  
+
+                           placeholder="yourname@college.edu"  
+
+                           class="w-full" 
+
+                           onkeypress="if(event.key==='Enter') handleLogin()"> 
+
+                    <div id="emailError" class="error-text hidden">Please enter a valid email address</div> 
+
+                </div> 
+
+                <div> 
+
+                    <label class="block mb-2 text-sm text-gray-300">Password (minimum 6 characters)</label> 
+
+                    <input type="password"  
+
+                           id="loginPassword"  
+
+                           placeholder="Create or enter your password"  
+
+                           class="w-full" 
+
+                           onkeypress="if(event.key==='Enter') handleLogin()"> 
+
+                    <div id="passwordError" class="error-text hidden">Password must be at least 6 characters</div> 
+
+                </div> 
+
+                 
+
+                <button onclick="handleLogin()" class="btn-primary w-full mt-6"> 
+
+                    🚀 Access EngiMind Dashboard 
+
+                </button> 
+
+            </div> 
+
+ 
+
+            <div class="mt-6 p-4 glass-strong rounded-lg text-center"> 
+
+                <p class="text-xs text-gray-400"> 
+
+                    New user? Just enter your email and create a password.<br> 
+
+                    Your study plan will be securely saved. 
+
+                </p> 
+
+            </div> 
+
+        </div> 
+
+    </div> 
+
+ 
+
+    <!-- Main Dashboard --> 
+
+    <div id="mainDashboard" class="hidden relative z-10 min-h-screen pb-20"> 
+
+        <!-- Header --> 
+
+        <div class="glass-strong border-b border-white/10"> 
+
+            <div class="max-w-7xl mx-auto px-4 md:px-6 py-4"> 
+
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"> 
+
+                    <div class="flex items-center gap-4"> 
+
+                        <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center flex-shrink-0"> 
+
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"> 
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path> 
+
+                            </svg> 
+
+                        </div> 
+
+                        <div> 
+
+                            <h1 class="text-xl font-bold">EngiMind AI</h1> 
+
+                            <div class="flex flex-wrap gap-2 mt-1"> 
+
+                                <span class="profile-badge" id="userNameBadge"> 
+
+                                    <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"> 
+
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path> 
+
+                                    </svg> 
+
+                                    Loading... 
+
+                                </span> 
+
+                                <span class="profile-badge text-xs" id="userEmailBadge"> 
+
+                                    <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"> 
+
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path> 
+
+                                    </svg> 
+
+                                    Loading... 
+
+                                </span> 
+
+                            </div> 
+
+                        </div> 
+
+                    </div> 
+
+                    <div class="flex gap-2 flex-wrap"> 
+
+                        <button onclick="saveProgress()" class="btn-secondary text-sm"> 
+
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"> 
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path> 
+
+                            </svg> 
+
+                            Save 
+
+                        </button> 
+
+                        <button onclick="handleLogout()" class="btn-secondary text-sm"> 
+
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"> 
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path> 
+
+                            </svg> 
+
+                            Logout 
+
+                        </button> 
+
+                    </div> 
+
+                </div> 
+
+            </div> 
+
+        </div> 
+
+ 
+
+        <!-- Tabs --> 
+
+        <div class="glass-strong border-b border-white/10"> 
+
+            <div class="max-w-7xl mx-auto px-4 md:px-6"> 
+
+                <div class="flex space-x-2 overflow-x-auto"> 
+
+                    <button class="tab-button active" onclick="switchTab('overview', event)"> 
+
+                        📊 Dashboard 
+
+                    </button> 
+
+                    <button class="tab-button" onclick="switchTab('planner', event)"> 
+
+                        📝 Planner 
+
+                    </button> 
+
+                    <button class="tab-button" onclick="switchTab('schedule', event)"> 
+
+                        📅 Schedule 
+
+                    </button> 
+
+                    <button class="tab-button" onclick="switchTab('focus', event)"> 
+
+                        🎯 Focus Mode 
+
+                    </button> 
+
+                </div> 
+
+            </div> 
+
+        </div> 
+
+ 
+
+        <!-- Content Area --> 
+
+        <div class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8"> 
+
+            <!-- Overview Tab --> 
+
+            <div id="overviewTab" class="tab-content"> 
+
+                <!-- Stats Grid --> 
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"> 
+
+                    <div class="glass stat-card p-4 md:p-6 rounded-2xl"> 
+
+                        <div class="flex items-center justify-between mb-2"> 
+
+                            <div class="text-2xl md:text-3xl">📚</div> 
+
+                            <div class="text-xs text-gray-400">Total</div> 
+
+                        </div> 
+
+                        <div class="text-2xl md:text-3xl font-bold gradient-text" id="statSubjects">3</div> 
+
+                        <div class="text-xs md:text-sm text-gray-400 mt-1">Subjects</div> 
+
+                    </div> 
+
+                    <div class="glass stat-card p-4 md:p-6 rounded-2xl"> 
+
+                        <div class="flex items-center justify-between mb-2"> 
+
+                            <div class="text-2xl md:text-3xl">⏱️</div> 
+
+                            <div class="text-xs text-gray-400">Total</div> 
+
+                        </div> 
+
+                        <div class="text-2xl md:text-3xl font-bold text-blue-400" id="statHours">140</div> 
+
+                        <div class="text-xs md:text-sm text-gray-400 mt-1">Study Hours</div> 
+
+                    </div> 
+
+                    <div class="glass stat-card p-4 md:p-6 rounded-2xl"> 
+
+                        <div class="flex items-center justify-between mb-2"> 
+
+                            <div class="text-2xl md:text-3xl">📈</div> 
+
+                            <div class="text-xs text-gray-400">Progress</div> 
+
+                        </div> 
+
+                        <div class="text-2xl md:text-3xl font-bold text-green-400" id="statProgress">0%</div> 
+
+                        <div class="text-xs md:text-sm text-gray-400 mt-1">Completed</div> 
+
+                    </div> 
+
+                    <div class="glass stat-card p-4 md:p-6 rounded-2xl"> 
+
+                        <div class="flex items-center justify-between mb-2"> 
+
+                            <div class="text-2xl md:text-3xl">🎯</div> 
+
+                            <div class="text-xs text-gray-400">Avg</div> 
+
+                        </div> 
+
+                        <div class="text-2xl md:text-3xl font-bold text-purple-400" id="statAvgHours">4.7h</div> 
+
+                        <div class="text-xs md:text-sm text-gray-400 mt-1">Per Day</div> 
+
+                    </div> 
+
+                </div> 
+
+ 
+
+                <!-- Main Content Grid --> 
+
+                <div class="grid lg:grid-cols-2 gap-6 mb-6"> 
+
+                    <!-- Charts --> 
+
+                    <div class="glass p-5 md:p-6 rounded-2xl"> 
+
+                        <h3 class="text-xl font-bold mb-4">📊 Credit Distribution</h3> 
+
+                        <div class="chart-container"> 
+
+                            <canvas id="creditChart"></canvas> 
+
+                        </div> 
+
+                    </div> 
+
+                    <div class="glass p-5 md:p-6 rounded-2xl"> 
+
+                        <h3 class="text-xl font-bold mb-4">📈 Confidence Levels</h3> 
+
+                        <div class="chart-container"> 
+
+                            <canvas id="confidenceChart"></canvas> 
+
+                        </div> 
+
+                    </div> 
+
+                </div> 
+
+ 
+
+                <!-- Priority List & Actions --> 
+
+                <div class="grid lg:grid-cols-3 gap-6"> 
+
+                    <div class="lg:col-span-2"> 
+
+                        <div class="glass p-5 md:p-6 rounded-2xl"> 
+
+                            <h3 class="text-xl font-bold mb-4">🎯 AI Priority Queue</h3> 
+
+                            <div class="text-xs text-gray-400 mb-4"> 
+
+                                Algorithm: Priority = (Credits × 0.4) + ((5 - Confidence) × 0.6) 
+
+                            </div> 
+
+                            <div id="priorityList" class="space-y-3"> 
+
+                                <!-- Will be populated dynamically --> 
+
+                            </div> 
+
+                        </div> 
+
+                    </div> 
+
+ 
+
+                    <div class="lg:col-span-1"> 
+
+                        <div class="glass p-5 md:p-6 rounded-2xl"> 
+
+                            <h3 class="text-xl font-bold mb-4">📋 Smart Actions</h3> 
+
+                            <div id="actionableSteps" class="space-y-3"> 
+
+                                <!-- Will be populated dynamically --> 
+
+                            </div> 
+
+                        </div> 
+
+                    </div> 
+
+                </div> 
+
+            </div> 
+
+ 
+
+            <!-- Plan Generator Tab --> 
+
+            <div id="plannerTab" class="tab-content hidden"> 
+
+                <div class="glass p-6 md:p-8 rounded-2xl"> 
+
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4"> 
+
+                        <h2 class="text-2xl font-bold">Configure Study Plan</h2> 
+
+                        <div class="flex gap-3 w-full md:w-auto"> 
+
+                            <button onclick="showAddSubjectModal()" class="btn-primary text-sm flex-1 md:flex-initial"> 
+
+                                + Add Subject 
+
+                            </button> 
+
+                            <button onclick="reBalanceSchedule()" class="btn-secondary text-sm flex-1 md:flex-initial"> 
+
+                                🔄 Re-Balance 
+
+                            </button> 
+
+                        </div> 
+
+                    </div> 
+
+ 
+
+                    <!-- Study Configuration --> 
+
+                    <div class="grid md:grid-cols-2 gap-6 mb-6"> 
+
+                        <div> 
+
+                            <label class="block mb-2 text-gray-300">Preferred Study Time</label> 
+
+                            <select id="preferredTime" class="w-full" onchange="saveConfiguration()"> 
+
+                                <option value="morning">Morning (6AM - 12PM)</option> 
+
+                                <option value="afternoon">Afternoon (12PM - 6PM)</option> 
+
+                                <option value="evening">Evening (6PM - 10PM)</option> 
+
+                                <option value="night" selected>Night (10PM - 2AM) - Deep Work</option> 
+
+                            </select> 
+
+                        </div> 
+
+                        <div> 
+
+                            <label class="block mb-2 text-gray-300">Target Deadline</label> 
+
+                            <input type="date" id="targetDate" class="w-full" onchange="saveConfiguration()"> 
+
+                        </div> 
+
+                    </div> 
+
+ 
+
+                    <div class="grid md:grid-cols-2 gap-6 mb-8"> 
+
+                        <div> 
+
+                            <label class="block mb-2 text-gray-300">Weekday Hours (per day)</label> 
+
+                            <input type="number" id="weekdayHours" min="1" max="12" value="5" class="w-full" onchange="saveConfiguration()"> 
+
+                        </div> 
+
+                        <div> 
+
+                            <label class="block mb-2 text-gray-300">Weekend Hours (per day)</label> 
+
+                            <input type="number" id="weekendHours" min="1" max="16" value="9" class="w-full" onchange="saveConfiguration()"> 
+
+                        </div> 
+
+                    </div> 
+
+ 
+
+                    <!-- Subjects Management --> 
+
+                    <div class="mb-6"> 
+
+                        <div class="flex justify-between items-center mb-4"> 
+
+                            <h3 class="text-xl font-bold">My Subjects</h3> 
+
+                        </div> 
+
+                         
+
+                        <div id="subjectsContainer" class="space-y-4"> 
+
+                            <!-- Subjects will be populated here --> 
+
+                        </div> 
+
+                    </div> 
+
+ 
+
+                    <button onclick="regeneratePlan()" class="btn-primary w-full"> 
+
+                        ✨ Generate AI-Optimized Plan 
+
+                    </button> 
+
+                </div> 
+
+            </div> 
+
+ 
+
+            <!-- Schedule Tab --> 
+
+            <div id="scheduleTab" class="tab-content hidden"> 
+
+                <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"> 
+
+                    <h2 class="text-2xl font-bold">Daily Study Schedule</h2> 
+
+                    <div class="flex gap-3 w-full md:w-auto"> 
+
+                        <button onclick="markDayMissed()" class="btn-secondary text-sm flex-1 md:flex-initial"> 
+
+                            ⏭️ Skip Day 
+
+                        </button> 
+
+                        <button onclick="markDayComplete()" class="btn-primary text-sm flex-1 md:flex-initial"> 
+
+                            ✅ Complete Day 
+
+                        </button> 
+
+                    </div> 
+
+                </div> 
+
+ 
+
+                <div id="calendarGrid" class="space-y-4"> 
+
+                    <!-- Calendar will be populated here --> 
+
+                </div> 
+
+            </div> 
+
+ 
+
+            <!-- Focus Mode Tab --> 
+
+            <div id="focusTab" class="tab-content hidden"> 
+
+                <div class="max-w-3xl mx-auto"> 
+
+                    <div class="glass p-8 md:p-12 rounded-2xl text-center"> 
+
+                        <h2 class="text-2xl md:text-3xl font-bold mb-8">🎯 Focus Mode - Pomodoro Timer</h2> 
+
+                         
+
+                        <!-- Timer Display --> 
+
+                        <div class="relative mb-8"> 
+
+                            <svg class="progress-ring mx-auto" width="280" height="280" viewBox="0 0 300 300"> 
+
+                                <circle class="text-gray-700" stroke="currentColor" stroke-width="8" fill="transparent" r="140" cx="150" cy="150"/> 
+
+                                <circle id="progressCircle" class="progress-ring-circle text-purple-500" stroke="currentColor" stroke-width="8" fill="transparent" r="140" cx="150" cy="150"  
+
+                                        stroke-dasharray="879.646" stroke-dashoffset="0"/> 
+
+                            </svg> 
+
+                            <div class="absolute inset-0 flex items-center justify-center"> 
+
+                                <div class="timer-display gradient-text" id="timerDisplay">25:00</div> 
+
+                            </div> 
+
+                        </div> 
+
+ 
+
+                        <!-- Current Subject --> 
+
+                        <div class="glass-strong p-4 rounded-xl mb-6"> 
+
+                            <div class="text-sm text-gray-400 mb-1">Currently Studying</div> 
+
+                            <div class="text-xl md:text-2xl font-bold" id="currentSubject">Select a subject</div> 
+
+                        </div> 
+
+ 
+
+                        <!-- Timer Controls --> 
+
+                        <div class="flex justify-center gap-4 mb-8 flex-wrap"> 
+
+                            <button id="startBtn" onclick="startTimer()" class="btn-primary px-8"> 
+
+                                ▶️ Start 
+
+                            </button> 
+
+                            <button id="pauseBtn" onclick="pauseTimer()" class="btn-secondary px-8 hidden"> 
+
+                                ⏸️ Pause 
+
+                            </button> 
+
+                            <button onclick="resetTimer()" class="btn-secondary px-8"> 
+
+                                🔄 Reset 
+
+                            </button> 
+
+                        </div> 
+
+ 
+
+                        <!-- Preset Timers --> 
+
+                        <div class="grid grid-cols-3 gap-4 mb-6"> 
+
+                            <button onclick="setTimer(25)" class="glass-strong p-4 rounded-xl hover:bg-white/10 transition"> 
+
+                                <div class="text-2xl mb-2">📚</div> 
+
+                                <div class="font-bold">25 min</div> 
+
+                                <div class="text-xs text-gray-400">Focus</div> 
+
+                            </button> 
+
+                            <button onclick="setTimer(5)" class="glass-strong p-4 rounded-xl hover:bg-white/10 transition"> 
+
+                                <div class="text-2xl mb-2">☕</div> 
+
+                                <div class="font-bold">5 min</div> 
+
+                                <div class="text-xs text-gray-400">Break</div> 
+
+                            </button> 
+
+                            <button onclick="setTimer(50)" class="glass-strong p-4 rounded-xl hover:bg-white/10 transition"> 
+
+                                <div class="text-2xl mb-2">🔥</div> 
+
+                                <div class="font-bold">50 min</div> 
+
+                                <div class="text-xs text-gray-400">Deep Work</div> 
+
+                            </button> 
+
+                        </div> 
+
+ 
+
+                        <!-- Session Stats --> 
+
+                        <div class="grid grid-cols-3 gap-4"> 
+
+                            <div class="glass-strong p-4 rounded-xl"> 
+
+                                <div class="text-2xl font-bold text-purple-400" id="sessionCount">0</div> 
+
+                                <div class="text-xs text-gray-400 mt-1">Sessions</div> 
+
+                            </div> 
+
+                            <div class="glass-strong p-4 rounded-xl"> 
+
+                                <div class="text-2xl font-bold text-blue-400" id="totalMinutes">0</div> 
+
+                                <div class="text-xs text-gray-400 mt-1">Minutes</div> 
+
+                            </div> 
+
+                            <div class="glass-strong p-4 rounded-xl"> 
+
+                                <div class="text-2xl font-bold text-green-400" id="streak">1</div> 
+
+                                <div class="text-xs text-gray-400 mt-1">Streak</div> 
+
+                            </div> 
+
+                        </div> 
+
+                    </div> 
+
+ 
+
+                    <!-- Subject Quick Select --> 
+
+                    <div class="glass p-6 rounded-2xl mt-6"> 
+
+                        <h3 class="text-lg font-bold mb-4">Quick Select Subject</h3> 
+
+                        <div id="subjectQuickSelect" class="grid grid-cols-1 md:grid-cols-2 gap-3"> 
+
+                            <!-- Will be populated dynamically --> 
+
+                        </div> 
+
+                    </div> 
+
+                </div> 
+
+            </div> 
+
+        </div> 
+
+    </div> 
+
+ 
+
+    <!-- Add Subject Modal --> 
+
+    <div id="addSubjectModal" class="modal"> 
+
+        <div class="modal-content"> 
+
+            <div class="flex justify-between items-center mb-6"> 
+
+                <h3 class="text-2xl font-bold gradient-text">Add New Subject</h3> 
+
+                <button onclick="closeAddSubjectModal()" class="text-gray-400 hover:text-white text-3xl">&times;</button> 
+
+            </div> 
+
+             
+
+            <div class="space-y-4"> 
+
+                <div> 
+
+                    <label class="block mb-2 text-gray-300">Subject Name</label> 
+
+                    <input type="text" id="newSubjectName" placeholder="e.g., Computer Networks" class="w-full"> 
+
+                </div> 
+
+                 
+
+                <div> 
+
+                    <label class="block mb-2 text-gray-300">Credits (1-6)</label> 
+
+                    <input type="number" id="newSubjectCredits" min="1" max="6" value="3" class="w-full"> 
+
+                </div> 
+
+                 
+
+                <div> 
+
+                    <label class="block mb-2 text-gray-300">Confidence Level (1-5)</label> 
+
+                    <div class="flex gap-2"> 
+
+                        <button type="button" onclick="setNewSubjectConfidence(1)" class="w-full h-12 rounded-lg glass hover:bg-purple-500 transition" data-confidence="1">1</button> 
+
+                        <button type="button" onclick="setNewSubjectConfidence(2)" class="w-full h-12 rounded-lg glass hover:bg-purple-500 transition" data-confidence="2">2</button> 
+
+                        <button type="button" onclick="setNewSubjectConfidence(3)" class="w-full h-12 rounded-lg bg-purple-600 transition" data-confidence="3">3</button> 
+
+                        <button type="button" onclick="setNewSubjectConfidence(4)" class="w-full h-12 rounded-lg glass hover:bg-purple-500 transition" data-confidence="4">4</button> 
+
+                        <button type="button" onclick="setNewSubjectConfidence(5)" class="w-full h-12 rounded-lg glass hover:bg-purple-500 transition" data-confidence="5">5</button> 
+
+                    </div> 
+
+                </div> 
+
+                 
+
+                <div> 
+
+                    <label class="block mb-2 text-gray-300">Hours Needed (10-100)</label> 
+
+                    <input type="number" id="newSubjectHours" min="10" max="100" value="30" class="w-full"> 
+
+                </div> 
+
+                 
+
+                <div> 
+
+                    <label class="block mb-2 text-gray-300">Topics (comma separated)</label> 
+
+                    <input type="text" id="newSubjectTopics" placeholder="e.g., TCP/IP, OSI Model, Routing" class="w-full"> 
+
+                </div> 
+
+                 
+
+                <button onclick="confirmAddSubject()" class="btn-primary w-full mt-4"> 
+
+                    ✅ Add Subject 
+
+                </button> 
+
+            </div> 
+
+        </div> 
+
+    </div> 
+
+ 
+
+    <script> 
+
+        // ==================== Global State ==================== 
+
+        let userData = { 
+
+            email: '', 
+
+            password: '', 
+
+            userName: '', 
+
+            subjects: [], 
+
+            preferences: { 
+
+                studyTime: 'night', 
+
+                targetDate: '', 
+
+                weekdayHours: 5, 
+
+                weekendHours: 9 
+
+            }, 
+
+            schedule: [], 
+
+            progress: { 
+
+                completedDays: 0, 
+
+                totalDays: 0, 
+
+                missedDays: 0 
+
+            } 
+
+        }; 
+
+ 
+
+        let newSubjectData = { 
+
+            confidence: 3 
+
+        }; 
+
+ 
+
+        let timerState = { 
+
+            minutes: 25, 
+
+            seconds: 0, 
+
+            isRunning: false, 
+
+            interval: null, 
+
+            totalSeconds: 1500, 
+
+            currentSubject: null, 
+
+            sessionsToday: 0, 
+
+            totalMinutesToday: 0 
+
+        }; 
+
+ 
+
+        let chartInstances = { 
+
+            credit: null, 
+
+            confidence: null 
+
+        }; 
+
+ 
+
+        // ==================== Three.js 3D Background ==================== 
+
+        let scene, camera, renderer, particles; 
+
+        let mouseX = 0, mouseY = 0; 
+
+ 
+
+        function initThreeJS() { 
+
+            scene = new THREE.Scene(); 
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); 
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true }); 
+
+             
+
+            renderer.setSize(window.innerWidth, window.innerHeight); 
+
+            document.getElementById('canvas-container').appendChild(renderer.domElement); 
+
+             
+
+            const geometry = new THREE.BufferGeometry(); 
+
+            const particleCount = 2000; 
+
+            const positions = new Float32Array(particleCount * 3); 
+
+            const colors = new Float32Array(particleCount * 3); 
+
+            const velocities = new Float32Array(particleCount * 3); 
+
+             
+
+            for (let i = 0; i < particleCount * 3; i += 3) { 
+
+                positions[i] = (Math.random() - 0.5) * 120; 
+
+                positions[i + 1] = (Math.random() - 0.5) * 120; 
+
+                positions[i + 2] = (Math.random() - 0.5) * 120; 
+
+                 
+
+                velocities[i] = (Math.random() - 0.5) * 0.02; 
+
+                velocities[i + 1] = (Math.random() - 0.5) * 0.02; 
+
+                velocities[i + 2] = (Math.random() - 0.5) * 0.02; 
+
+                 
+
+                const colorVariation = Math.random(); 
+
+                colors[i] = 0.4 + colorVariation * 0.2; 
+
+                colors[i + 1] = 0.5 + colorVariation * 0.3; 
+
+                colors[i + 2] = 0.9 + colorVariation * 0.1; 
+
+            } 
+
+             
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3)); 
+
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3)); 
+
+            geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3)); 
+
+             
+
+            const material = new THREE.PointsMaterial({ 
+
+                size: 0.6, 
+
+                vertexColors: true, 
+
+                transparent: true, 
+
+                opacity: 0.7, 
+
+                blending: THREE.AdditiveBlending 
+
+            }); 
+
+             
+
+            particles = new THREE.Points(geometry, material); 
+
+            scene.add(particles); 
+
+             
+
+            camera.position.z = 50; 
+
+            animate3D(); 
+
+        } 
+
+ 
+
+        function animate3D() { 
+
+            requestAnimationFrame(animate3D); 
+
+             
+
+            const positions = particles.geometry.attributes.position.array; 
+
+            const velocities = particles.geometry.attributes.velocity.array; 
+
+             
+
+            for (let i = 0; i < positions.length; i += 3) { 
+
+                positions[i] += velocities[i]; 
+
+                positions[i + 1] += velocities[i + 1]; 
+
+                positions[i + 2] += velocities[i + 2]; 
+
+                 
+
+                if (Math.abs(positions[i]) > 60) velocities[i] *= -1; 
+
+                if (Math.abs(positions[i + 1]) > 60) velocities[i + 1] *= -1; 
+
+                if (Math.abs(positions[i + 2]) > 60) velocities[i + 2] *= -1; 
+
+            } 
+
+             
+
+            particles.geometry.attributes.position.needsUpdate = true; 
+
+             
+
+            particles.rotation.x += 0.0003; 
+
+            particles.rotation.y += 0.0005; 
+
+            particles.rotation.y += (mouseX * 0.00003); 
+
+            particles.rotation.x += (mouseY * 0.00003); 
+
+             
+
+            renderer.render(scene, camera); 
+
+        } 
+
+ 
+
+        document.addEventListener('mousemove', (event) => { 
+
+            mouseX = event.clientX - window.innerWidth / 2; 
+
+            mouseY = event.clientY - window.innerHeight / 2; 
+
+        }); 
+
+ 
+
+        window.addEventListener('resize', () => { 
+
+            camera.aspect = window.innerWidth / window.innerHeight; 
+
+            camera.updateProjectionMatrix(); 
+
+            renderer.setSize(window.innerWidth, window.innerHeight); 
+
+        }); 
+
+ 
+
+        // ==================== Authentication ==================== 
+
+        function extractUserName(email) { 
+
+            const username = email.split('@')[0]; 
+
+            return username.charAt(0).toUpperCase() + username.slice(1); 
+
+        } 
+
+ 
+
+        function validateEmail(email) { 
+
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+
+            return re.test(email); 
+
+        } 
+
+ 
+
+        function handleLogin() { 
+
+            const email = document.getElementById('loginEmail').value.trim(); 
+
+            const password = document.getElementById('loginPassword').value; 
+
+             
+
+            // Clear previous errors 
+
+            document.getElementById('emailError').classList.add('hidden'); 
+
+            document.getElementById('passwordError').classList.add('hidden'); 
+
+             
+
+            let hasError = false; 
+
+             
+
+            if (!email || !validateEmail(email)) { 
+
+                document.getElementById('emailError').classList.remove('hidden'); 
+
+                hasError = true; 
+
+            } 
+
+             
+
+            if (!password || password.length < 6) { 
+
+                document.getElementById('passwordError').classList.remove('hidden'); 
+
+                hasError = true; 
+
+            } 
+
+             
+
+            if (hasError) return; 
+
+             
+
+            const storageKey = `engimind_${email}`; 
+
+            const existingData = localStorage.getItem(storageKey); 
+
+             
+
+            if (existingData) { 
+
+                const savedData = JSON.parse(existingData); 
+
+                if (savedData.password !== password) { 
+
+                    alert('Incorrect password'); 
+
+                    return; 
+
+                } 
+
+                userData = savedData; 
+
+            } else { 
+
+                userData.email = email; 
+
+                userData.password = password; 
+
+                userData.userName = extractUserName(email); 
+
+                 
+
+                userData.subjects = [ 
+
+                    { 
+
+                        name: 'Data Structures & Algorithms', 
+
+                        credits: 4, 
+
+                        confidence: 2, 
+
+                        hoursNeeded: 50, 
+
+                        topics: ['Arrays', 'Trees', 'Graphs', 'Dynamic Programming'] 
+
+                    }, 
+
+                    { 
+
+                        name: 'Operating Systems', 
+
+                        credits: 4, 
+
+                        confidence: 2, 
+
+                        hoursNeeded: 45, 
+
+                        topics: ['Process Management', 'Memory Management', 'File Systems'] 
+
+                    }, 
+
+                    { 
+
+                        name: 'Engineering Mathematics', 
+
+                        credits: 6, 
+
+                        confidence: 2, 
+
+                        hoursNeeded: 60, 
+
+                        topics: ['Laplace Transform', 'Vector Calculus', 'Linear Algebra'] 
+
+                    } 
+
+                ]; 
+
+                 
+
+                const defaultDate = new Date(); 
+
+                defaultDate.setDate(defaultDate.getDate() + 30); 
+
+                userData.preferences.targetDate = defaultDate.toISOString().split('T')[0]; 
+
+            } 
+
+             
+
+            saveUserData(); 
+
+            localStorage.setItem('engimind_lastEmail', email); 
+
+            localStorage.setItem('engimind_session', 'active'); 
+
+             
+
+            gsap.to('#loginScreen', { 
+
+                opacity: 0, 
+
+                scale: 0.9, 
+
+                duration: 0.5, 
+
+                onComplete: () => { 
+
+                    document.getElementById('loginScreen').classList.add('hidden'); 
+
+                    document.getElementById('mainDashboard').classList.remove('hidden'); 
+
+                    gsap.from('#mainDashboard', { 
+
+                        opacity: 0, 
+
+                        scale: 1.05, 
+
+                        duration: 0.5 
+
+                    }); 
+
+                    initializeDashboard(); 
+
+                } 
+
+            }); 
+
+        } 
+
+ 
+
+        function handleLogout() { 
+
+            if (confirm('Logout? Your data is saved and will be restored on next login.')) { 
+
+                localStorage.removeItem('engimind_session'); 
+
+                 
+
+                gsap.to('#mainDashboard', { 
+
+                    opacity: 0, 
+
+                    scale: 0.9, 
+
+                    duration: 0.5, 
+
+                    onComplete: () => { 
+
+                        document.getElementById('mainDashboard').classList.add('hidden'); 
+
+                        document.getElementById('loginScreen').classList.remove('hidden'); 
+
+                        document.getElementById('loginEmail').value = ''; 
+
+                        document.getElementById('loginPassword').value = ''; 
+
+                        gsap.from('#loginScreen', { 
+
+                            opacity: 0, 
+
+                            scale: 1.05, 
+
+                            duration: 0.5 
+
+                        }); 
+
+                    } 
+
+                }); 
+
+            } 
+
+        } 
+
+ 
+
+        // ==================== Subject Modal Management ==================== 
+
+        function showAddSubjectModal() { 
+
+            document.getElementById('addSubjectModal').classList.add('active'); 
+
+            document.getElementById('newSubjectName').value = ''; 
+
+            document.getElementById('newSubjectCredits').value = 3; 
+
+            document.getElementById('newSubjectHours').value = 30; 
+
+            document.getElementById('newSubjectTopics').value = ''; 
+
+            newSubjectData.confidence = 3; 
+
+             
+
+            // Reset confidence buttons 
+
+            document.querySelectorAll('[data-confidence]').forEach(btn => { 
+
+                btn.classList.remove('bg-purple-600'); 
+
+                btn.classList.add('glass'); 
+
+            }); 
+
+            document.querySelector('[data-confidence="3"]').classList.remove('glass'); 
+
+            document.querySelector('[data-confidence="3"]').classList.add('bg-purple-600'); 
+
+        } 
+
+ 
+
+        function closeAddSubjectModal() { 
+
+            document.getElementById('addSubjectModal').classList.remove('active'); 
+
+        } 
+
+ 
+
+        function setNewSubjectConfidence(level) { 
+
+            newSubjectData.confidence = level; 
+
+             
+
+            // Update button styles 
+
+            document.querySelectorAll('[data-confidence]').forEach(btn => { 
+
+                btn.classList.remove('bg-purple-600'); 
+
+                btn.classList.add('glass'); 
+
+            }); 
+
+            document.querySelector(`[data-confidence="${level}"]`).classList.remove('glass'); 
+
+            document.querySelector(`[data-confidence="${level}"]`).classList.add('bg-purple-600'); 
+
+        } 
+
+ 
+
+        function confirmAddSubject() { 
+
+            const name = document.getElementById('newSubjectName').value.trim(); 
+
+            const credits = parseInt(document.getElementById('newSubjectCredits').value); 
+
+            const hours = parseInt(document.getElementById('newSubjectHours').value); 
+
+            const topics = document.getElementById('newSubjectTopics').value.trim(); 
+
+             
+
+            if (!name) { 
+
+                alert('Please enter a subject name'); 
+
+                return; 
+
+            } 
+
+             
+
+            const newSubject = { 
+
+                name: name, 
+
+                credits: credits, 
+
+                confidence: newSubjectData.confidence, 
+
+                hoursNeeded: hours, 
+
+                topics: topics ? topics.split(',').map(t => t.trim()).filter(t => t) : [] 
+
+            }; 
+
+             
+
+            userData.subjects.push(newSubject); 
+
+            saveUserData(); 
+
+             
+
+            closeAddSubjectModal(); 
+
+            renderPlanner(); 
+
+            renderOverview(); 
+
+            renderFocusMode(); 
+
+             
+
+            showSaveIndicator('Subject added successfully! 🎉'); 
+
+        } 
+
+ 
+
+        // ==================== Dashboard Initialization ==================== 
+
+        function initializeDashboard() { 
+
+            document.getElementById('userNameBadge').innerHTML = ` 
+
+                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"> 
+
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path> 
+
+                </svg> 
+
+                ${userData.userName} 
+
+            `; 
+
+             
+
+            document.getElementById('userEmailBadge').innerHTML = ` 
+
+                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"> 
+
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path> 
+
+                </svg> 
+
+                ${userData.email} 
+
+            `; 
+
+             
+
+            if (userData.schedule.length === 0) { 
+
+                generateSchedule(); 
+
+            } 
+
+             
+
+            renderOverview(); 
+
+            renderPlanner(); 
+
+            renderSchedule(); 
+
+            renderFocusMode(); 
+
+        } 
+
+ 
+
+        // ==================== Priority Calculation ==================== 
+
+        function calculatePriority(credits, confidence) { 
+
+            return (credits * 0.4) + ((5 - confidence) * 0.6); 
+
+        } 
+
+ 
+
+        // ==================== Schedule Generation ==================== 
+
+        function generateSchedule() { 
+
+            const targetDate = new Date(userData.preferences.targetDate); 
+
+            const today = new Date(); 
+
+            const daysUntilTarget = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24)); 
+
+             
+
+            if (daysUntilTarget <= 0) return; 
+
+             
+
+            const weekdays = Math.floor(daysUntilTarget * 5 / 7); 
+
+            const weekends = Math.floor(daysUntilTarget * 2 / 7); 
+
+            const totalHours = (weekdays * userData.preferences.weekdayHours) +  
+
+                             (weekends * userData.preferences.weekendHours); 
+
+             
+
+            const sortedSubjects = [...userData.subjects].map(s => ({ 
+
+                ...s, 
+
+                priority: calculatePriority(s.credits, s.confidence) 
+
+            })).sort((a, b) => b.priority - a.priority); 
+
+             
+
+            const schedule = []; 
+
+            let currentSubjectIndex = 0; 
+
+            let hoursRemaining = sortedSubjects.map(s => s.hoursNeeded); 
+
+             
+
+            for (let day = 0; day < Math.min(daysUntilTarget, 30); day++) { 
+
+                const date = new Date(); 
+
+                date.setDate(date.getDate() + day); 
+
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6; 
+
+                const dailyHours = isWeekend ? userData.preferences.weekendHours : userData.preferences.weekdayHours; 
+
+                 
+
+                const daySchedule = { 
+
+                    date: date.toISOString().split('T')[0], 
+
+                    displayDate: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }), 
+
+                    isWeekend, 
+
+                    sessions: [], 
+
+                    completed: false, 
+
+                    missed: false 
+
+                }; 
+
+                 
+
+                let hoursAllocated = 0; 
+
+                 
+
+                while (hoursAllocated < dailyHours && currentSubjectIndex < sortedSubjects.length) { 
+
+                    const subject = sortedSubjects[currentSubjectIndex]; 
+
+                    const hoursToAllocate = Math.min( 
+
+                        dailyHours - hoursAllocated, 
+
+                        hoursRemaining[currentSubjectIndex], 
+
+                        3 
+
+                    ); 
+
+                     
+
+                    if (hoursToAllocate > 0) { 
+
+                        let sessionType, timeSlot; 
+
+                        if (subject.confidence <= 2) { 
+
+                            sessionType = 'Deep Work'; 
+
+                            timeSlot = userData.preferences.studyTime; 
+
+                        } else if (subject.confidence === 3) { 
+
+                            sessionType = 'Active Learning'; 
+
+                            timeSlot = 'afternoon'; 
+
+                        } else { 
+
+                            sessionType = 'Review'; 
+
+                            timeSlot = 'morning'; 
+
+                        } 
+
+                         
+
+                        daySchedule.sessions.push({ 
+
+                            subject: subject.name, 
+
+                            hours: hoursToAllocate, 
+
+                            type: sessionType, 
+
+                            timeSlot: timeSlot, 
+
+                            priority: subject.priority > 3.5 ? 'high' : subject.priority > 2.5 ? 'medium' : 'low', 
+
+                            confidence: subject.confidence 
+
+                        }); 
+
+                         
+
+                        hoursRemaining[currentSubjectIndex] -= hoursToAllocate; 
+
+                        hoursAllocated += hoursToAllocate; 
+
+                         
+
+                        if (hoursRemaining[currentSubjectIndex] <= 0) { 
+
+                            currentSubjectIndex++; 
+
+                        } 
+
+                    } else { 
+
+                        currentSubjectIndex++; 
+
+                    } 
+
+                } 
+
+                 
+
+                schedule.push(daySchedule); 
+
+            } 
+
+             
+
+            userData.schedule = schedule; 
+
+            userData.progress.totalDays = schedule.length; 
+
+            saveUserData(); 
+
+        } 
+
+ 
+
+        // ==================== Overview Rendering ==================== 
+
+        function renderOverview() { 
+
+            const totalHours = userData.subjects.reduce((sum, s) => sum + s.hoursNeeded, 0); 
+
+            const completedHours = userData.schedule 
+
+                .filter(d => d.completed) 
+
+                .reduce((sum, d) => sum + d.sessions.reduce((s, sess) => s + sess.hours, 0), 0); 
+
+            const progress = userData.progress.totalDays > 0  
+
+                ? ((userData.progress.completedDays / userData.progress.totalDays) * 100).toFixed(1) 
+
+                : 0; 
+
+            const avgHours = userData.schedule.length > 0 
+
+                ? (totalHours / userData.schedule.length).toFixed(1) 
+
+                : 0; 
+
+             
+
+            document.getElementById('statSubjects').textContent = userData.subjects.length; 
+
+            document.getElementById('statHours').textContent = totalHours; 
+
+            document.getElementById('statProgress').textContent = progress + '%'; 
+
+            document.getElementById('statAvgHours').textContent = avgHours + 'h'; 
+
+             
+
+            if (chartInstances.credit) chartInstances.credit.destroy(); 
+
+            if (chartInstances.confidence) chartInstances.confidence.destroy(); 
+
+             
+
+            const creditCtx = document.getElementById('creditChart').getContext('2d'); 
+
+            chartInstances.credit = new Chart(creditCtx, { 
+
+                type: 'doughnut', 
+
+                data: { 
+
+                    labels: userData.subjects.map(s => s.name.split(' ')[0]), 
+
+                    datasets: [{ 
+
+                        data: userData.subjects.map(s => s.credits), 
+
+                        backgroundColor: [ 
+
+                            'rgba(102, 126, 234, 0.8)', 
+
+                            'rgba(118, 75, 162, 0.8)', 
+
+                            'rgba(237, 100, 166, 0.8)', 
+
+                            'rgba(255, 154, 158, 0.8)', 
+
+                            'rgba(129, 216, 208, 0.8)', 
+
+                            'rgba(255, 206, 86, 0.8)', 
+
+                            'rgba(75, 192, 192, 0.8)', 
+
+                            'rgba(153, 102, 255, 0.8)' 
+
+                        ], 
+
+                        borderWidth: 0 
+
+                    }] 
+
+                }, 
+
+                options: { 
+
+                    responsive: true, 
+
+                    maintainAspectRatio: false, 
+
+                    plugins: { 
+
+                        legend: { 
+
+                            position: 'bottom', 
+
+                            labels: {  
+
+                                color: 'white',  
+
+                                padding: 12, 
+
+                                font: { size: 11 } 
+
+                            } 
+
+                        } 
+
+                    } 
+
+                } 
+
+            }); 
+
+             
+
+            const confCtx = document.getElementById('confidenceChart').getContext('2d'); 
+
+            chartInstances.confidence = new Chart(confCtx, { 
+
+                type: 'bar', 
+
+                data: { 
+
+                    labels: userData.subjects.map(s => s.name.split(' ').slice(0, 2).join(' ')), 
+
+                    datasets: [{ 
+
+                        label: 'Confidence', 
+
+                        data: userData.subjects.map(s => s.confidence), 
+
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)', 
+
+                        borderRadius: 6 
+
+                    }] 
+
+                }, 
+
+                options: { 
+
+                    responsive: true, 
+
+                    maintainAspectRatio: false, 
+
+                    scales: { 
+
+                        y: { 
+
+                            beginAtZero: true, 
+
+                            max: 5, 
+
+                            ticks: {  
+
+                                color: 'white', 
+
+                                font: { size: 10 }, 
+
+                                stepSize: 1 
+
+                            }, 
+
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' } 
+
+                        }, 
+
+                        x: { 
+
+                            ticks: {  
+
+                                color: 'white', 
+
+                                font: { size: 10 } 
+
+                            }, 
+
+                            grid: { display: false } 
+
+                        } 
+
+                    }, 
+
+                    plugins: { 
+
+                        legend: { display: false } 
+
+                    } 
+
+                } 
+
+            }); 
+
+             
+
+            const priorityList = userData.subjects 
+
+                .map(s => ({ ...s, priority: calculatePriority(s.credits, s.confidence) })) 
+
+                .sort((a, b) => b.priority - a.priority); 
+
+             
+
+            document.getElementById('priorityList').innerHTML = priorityList.map((subject, i) => { 
+
+                const priorityLevel = subject.priority > 3.5 ? 'high' : subject.priority > 2.5 ? 'medium' : 'low'; 
+
+                const color = priorityLevel === 'high' ? 'bg-red-500' : priorityLevel === 'medium' ? 'bg-yellow-500' : 'bg-green-500'; 
+
+                const totalNeeded = userData.subjects.reduce((sum, s) => sum + s.hoursNeeded, 0); 
+
+                const percentage = ((subject.hoursNeeded / totalNeeded) * 100).toFixed(1); 
+
+                 
+
+                return ` 
+
+                    <div class="priority-${priorityLevel} glass-strong p-4 rounded-xl subject-item"> 
+
+                        <div class="flex justify-between items-start mb-2"> 
+
+                            <div> 
+
+                                <div class="font-bold text-white">${i + 1}. ${subject.name}</div> 
+
+                                <div class="text-xs text-gray-400 mt-1"> 
+
+                                    ${subject.topics.slice(0, 3).join(' • ')} 
+
+                                </div> 
+
+                            </div> 
+
+                            <div class="text-right"> 
+
+                                <div class="text-xl font-bold gradient-text">${subject.hoursNeeded}h</div> 
+
+                                <div class="text-xs text-gray-400">${percentage}%</div> 
+
+                            </div> 
+
+                        </div> 
+
+                        <div class="w-full bg-gray-700 rounded-full h-2 mb-2"> 
+
+                            <div class="${color} h-2 rounded-full transition-all duration-1000" style="width: ${percentage}%"></div> 
+
+                        </div> 
+
+                        <div class="flex justify-between text-xs text-gray-400"> 
+
+                            <span>Priority: ${subject.priority.toFixed(2)}</span> 
+
+                            <span>Confidence: ${subject.confidence}/5</span> 
+
+                        </div> 
+
+                    </div> 
+
+                `; 
+
+            }).join(''); 
+
+ 
+
+            renderActionableSteps(); 
+
+        } 
+
+ 
+
+        function renderActionableSteps() { 
+
+            const nextSteps = []; 
+
+             
+
+            const today = userData.schedule.find(d => !d.completed && !d.missed); 
+
+            if (today && today.sessions.length > 0) { 
+
+                nextSteps.push({ 
+
+                    icon: '🎯', 
+
+                    title: 'Today\'s Focus', 
+
+                    description: `${today.sessions[0].subject} - ${today.sessions[0].hours}h`, 
+
+                    type: today.sessions[0].type 
+
+                }); 
+
+            } 
+
+             
+
+            const weakSubjects = userData.subjects.filter(s => s.confidence <= 2); 
+
+            if (weakSubjects.length > 0) { 
+
+                nextSteps.push({ 
+
+                    icon: '⚠️', 
+
+                    title: 'Weak Area Alert', 
+
+                    description: `${weakSubjects[0].name} needs focus`, 
+
+                    type: 'High Priority' 
+
+                }); 
+
+            } 
+
+             
+
+            nextSteps.push({ 
+
+                icon: '⏱️', 
+
+                title: 'Focus Mode', 
+
+                description: 'Use Pomodoro timer for deep work', 
+
+                type: 'Productivity Tool' 
+
+            }); 
+
+             
+
+            const progress = (userData.progress.completedDays / userData.progress.totalDays * 100).toFixed(0); 
+
+            nextSteps.push({ 
+
+                icon: '📊', 
+
+                title: 'Progress', 
+
+                description: `${progress}% of study plan complete`, 
+
+                type: 'Keep Going!' 
+
+            }); 
+
+             
+
+            document.getElementById('actionableSteps').innerHTML = nextSteps.map(step => ` 
+
+                <div class="action-card"> 
+
+                    <div class="flex items-start gap-3"> 
+
+                        <div class="text-2xl flex-shrink-0">${step.icon}</div> 
+
+                        <div> 
+
+                            <div class="font-bold text-white mb-1">${step.title}</div> 
+
+                            <div class="text-sm text-gray-300 mb-2">${step.description}</div> 
+
+                            <div class="text-xs text-purple-400">${step.type}</div> 
+
+                        </div> 
+
+                    </div> 
+
+                </div> 
+
+            `).join(''); 
+
+        } 
+
+ 
+
+        // ==================== Planner Rendering ==================== 
+
+        function renderPlanner() { 
+
+            document.getElementById('preferredTime').value = userData.preferences.studyTime; 
+
+            document.getElementById('targetDate').value = userData.preferences.targetDate; 
+
+            document.getElementById('weekdayHours').value = userData.preferences.weekdayHours; 
+
+            document.getElementById('weekendHours').value = userData.preferences.weekendHours; 
+
+             
+
+            const container = document.getElementById('subjectsContainer'); 
+
+            container.innerHTML = userData.subjects.map((subject, i) => ` 
+
+                <div class="glass-strong p-4 md:p-6 rounded-xl"> 
+
+                    <div class="grid md:grid-cols-12 gap-4 items-center"> 
+
+                        <div class="md:col-span-4"> 
+
+                            <label class="block mb-2 text-gray-300 text-sm">Subject</label> 
+
+                            <input type="text"  
+
+                                   id="subjectName_${i}"  
+
+                                   value="${subject.name}" 
+
+                                   onchange="updateSubject(${i})" 
+
+                                   class="w-full"> 
+
+                        </div> 
+
+                        <div class="md:col-span-2"> 
+
+                            <label class="block mb-2 text-gray-300 text-sm">Credits</label> 
+
+                            <input type="number"  
+
+                                   id="subjectCredits_${i}"  
+
+                                   min="1"  
+
+                                   max="6"  
+
+                                   value="${subject.credits}" 
+
+                                   onchange="updateSubject(${i})" 
+
+                                   class="w-full"> 
+
+                        </div> 
+
+                        <div class="md:col-span-2"> 
+
+                            <label class="block mb-2 text-gray-300 text-sm">Hours</label> 
+
+                            <input type="number"  
+
+                                   id="subjectHours_${i}"  
+
+                                   min="10"  
+
+                                   max="100"  
+
+                                   value="${subject.hoursNeeded}" 
+
+                                   onchange="updateSubject(${i})" 
+
+                                   class="w-full"> 
+
+                        </div> 
+
+                        <div class="md:col-span-3"> 
+
+                            <label class="block mb-2 text-gray-300 text-sm">Confidence</label> 
+
+                            <div class="flex gap-2"> 
+
+                                ${[1,2,3,4,5].map(level => ` 
+
+                                    <button type="button"  
+
+                                            onclick="setSubjectConfidence(${i}, ${level})" 
+
+                                            class="w-10 h-10 rounded-lg ${subject.confidence === level ? 'bg-purple-600' : 'glass'} hover:bg-purple-500 transition text-sm"> 
+
+                                        ${level} 
+
+                                    </button> 
+
+                                `).join('')} 
+
+                            </div> 
+
+                        </div> 
+
+                        <div class="md:col-span-1 flex justify-center"> 
+
+                            <button onclick="removeSubject(${i})"  
+
+                                    class="text-red-400 hover:text-red-300 text-2xl p-2" 
+
+                                    title="Delete Subject"> 
+
+                                🗑️ 
+
+                            </button> 
+
+                        </div> 
+
+                    </div> 
+
+                    <div class="mt-4"> 
+
+                        <label class="block mb-2 text-gray-300 text-sm">Topics</label> 
+
+                        <input type="text"  
+
+                               id="subjectTopics_${i}"  
+
+                               value="${subject.topics.join(', ')}" 
+
+                               onchange="updateSubject(${i})" 
+
+                               class="w-full" 
+
+                               placeholder="e.g., Arrays, Trees"> 
+
+                    </div> 
+
+                </div> 
+
+            `).join(''); 
+
+        } 
+
+ 
+
+        function updateSubject(index) { 
+
+            const subject = userData.subjects[index]; 
+
+            subject.name = document.getElementById(`subjectName_${index}`).value; 
+
+            subject.credits = parseInt(document.getElementById(`subjectCredits_${index}`).value); 
+
+            subject.hoursNeeded = parseInt(document.getElementById(`subjectHours_${index}`).value); 
+
+            const topics = document.getElementById(`subjectTopics_${index}`).value; 
+
+            subject.topics = topics.split(',').map(t => t.trim()).filter(t => t); 
+
+            saveUserData(); 
+
+        } 
+
+ 
+
+        function setSubjectConfidence(index, level) { 
+
+            userData.subjects[index].confidence = level; 
+
+            renderPlanner(); 
+
+            saveUserData(); 
+
+        } 
+
+ 
+
+        function removeSubject(index) { 
+
+            if (confirm(`Remove "${userData.subjects[index].name}" from your subjects?`)) { 
+
+                userData.subjects.splice(index, 1); 
+
+                renderPlanner(); 
+
+                renderOverview(); 
+
+                renderFocusMode(); 
+
+                saveUserData(); 
+
+                showSaveIndicator('Subject removed'); 
+
+            } 
+
+        } 
+
+ 
+
+        function saveConfiguration() { 
+
+            userData.preferences.studyTime = document.getElementById('preferredTime').value; 
+
+            userData.preferences.targetDate = document.getElementById('targetDate').value; 
+
+            userData.preferences.weekdayHours = parseInt(document.getElementById('weekdayHours').value); 
+
+            userData.preferences.weekendHours = parseInt(document.getElementById('weekendHours').value); 
+
+            saveUserData(); 
+
+        } 
+
+ 
+
+        function regeneratePlan() { 
+
+            generateSchedule(); 
+
+            renderOverview(); 
+
+            renderSchedule(); 
+
+            switchTab('schedule', { target: document.querySelector('[onclick*="schedule"]') }); 
+
+            showSaveIndicator('Plan regenerated! ✨'); 
+
+        } 
+
+ 
+
+        function reBalanceSchedule() { 
+
+            generateSchedule(); 
+
+            renderSchedule(); 
+
+            renderOverview(); 
+
+            showSaveIndicator('Schedule re-balanced! 🔄'); 
+
+        } 
+
+ 
+
+        // ==================== Schedule Rendering ==================== 
+
+        function renderSchedule() { 
+
+            const container = document.getElementById('calendarGrid'); 
+
+             
+
+            if (userData.schedule.length === 0) { 
+
+                container.innerHTML = '<div class="glass p-8 text-center text-gray-400">No schedule. Go to Planner and click "Generate AI-Optimized Plan".</div>'; 
+
+                return; 
+
+            } 
+
+             
+
+            container.innerHTML = userData.schedule.map((day, i) => { 
+
+                const statusClass = day.completed ? 'border-green-500' : day.missed ? 'border-red-500' : ''; 
+
+                const statusIcon = day.completed ? '✅' : day.missed ? '❌' : i === 0 ? '📍' : ''; 
+
+                 
+
+                return ` 
+
+                    <div class="glass-strong p-4 md:p-5 rounded-xl ${statusClass} border-l-4 fade-in-up" style="animation-delay: ${i * 0.03}s"> 
+
+                        <div class="flex justify-between items-center mb-4"> 
+
+                            <div class="flex items-center gap-3"> 
+
+                                <span class="text-xl md:text-2xl">${statusIcon}</span> 
+
+                                <div> 
+
+                                    <span class="font-bold text-white">Day ${i + 1}</span> 
+
+                                    <span class="text-gray-400 ml-2 text-sm">${day.displayDate}</span> 
+
+                                    ${day.isWeekend ? '<span class="ml-2 text-xs bg-purple-600 px-2 py-1 rounded">Weekend</span>' : ''} 
+
+                                </div> 
+
+                            </div> 
+
+                            <div class="text-sm text-gray-400"> 
+
+                                ${day.sessions.reduce((sum, s) => sum + s.hours, 0)}h 
+
+                            </div> 
+
+                        </div> 
+
+                        <div class="space-y-2"> 
+
+                            ${day.sessions.map(session => ` 
+
+                                <div class="priority-${session.priority} bg-white/5 p-3 rounded-lg"> 
+
+                                    <div class="flex justify-between items-start"> 
+
+                                        <div class="flex-1"> 
+
+                                            <div class="font-semibold text-white text-sm md:text-base">${session.subject}</div> 
+
+                                            <div class="text-xs text-gray-400 mt-1"> 
+
+                                                ${session.type} • ${getTimeSlotDisplay(session.timeSlot)} 
+
+                                                ${session.confidence <= 2 ? ' • <span class="text-red-300">High Focus</span>' : ''} 
+
+                                            </div> 
+
+                                        </div> 
+
+                                        <div class="text-purple-400 font-bold ml-2">${session.hours}h</div> 
+
+                                    </div> 
+
+                                </div> 
+
+                            `).join('')} 
+
+                        </div> 
+
+                    </div> 
+
+                `; 
+
+            }).join(''); 
+
+        } 
+
+ 
+
+        function getTimeSlotDisplay(slot) { 
+
+            const slots = { 
+
+                'morning': '6AM-12PM', 
+
+                'afternoon': '12PM-6PM', 
+
+                'evening': '6PM-10PM', 
+
+                'night': '10PM-2AM' 
+
+            }; 
+
+            return slots[slot] || slot; 
+
+        } 
+
+ 
+
+        function markDayComplete() { 
+
+            const today = userData.schedule.find(d => !d.completed && !d.missed); 
+
+            if (today) { 
+
+                today.completed = true; 
+
+                userData.progress.completedDays++; 
+
+                saveUserData(); 
+
+                renderSchedule(); 
+
+                renderOverview(); 
+
+                showSaveIndicator('Day complete! 🎉'); 
+
+            } 
+
+        } 
+
+ 
+
+        function markDayMissed() { 
+
+            const today = userData.schedule.find(d => !d.completed && !d.missed); 
+
+            if (today) { 
+
+                today.missed = true; 
+
+                userData.progress.missedDays++; 
+
+                saveUserData(); 
+
+                renderSchedule(); 
+
+                renderOverview(); 
+
+                showSaveIndicator('Day skipped ⏭️'); 
+
+            } 
+
+        } 
+
+ 
+
+        // ==================== Focus Mode ==================== 
+
+        function renderFocusMode() { 
+
+            const container = document.getElementById('subjectQuickSelect'); 
+
+            container.innerHTML = userData.subjects.map(subject => ` 
+
+                <button onclick="selectFocusSubject('${subject.name}')"  
+
+                        class="glass-strong p-4 rounded-xl hover:bg-white/10 transition text-left"> 
+
+                    <div class="font-bold text-white mb-1">${subject.name}</div> 
+
+                    <div class="text-xs text-gray-400">Confidence: ${subject.confidence}/5</div> 
+
+                </button> 
+
+            `).join(''); 
+
+             
+
+            const savedTimer = localStorage.getItem('pomodoroState'); 
+
+            if (savedTimer) { 
+
+                const state = JSON.parse(savedTimer); 
+
+                const today = new Date().toDateString(); 
+
+                if (state.date === today) { 
+
+                    timerState.sessionsToday = state.sessionsToday || 0; 
+
+                    timerState.totalMinutesToday = state.totalMinutesToday || 0; 
+
+                    document.getElementById('sessionCount').textContent = timerState.sessionsToday; 
+
+                    document.getElementById('totalMinutes').textContent = timerState.totalMinutesToday; 
+
+                } 
+
+            } 
+
+        } 
+
+ 
+
+        function selectFocusSubject(subjectName) { 
+
+            timerState.currentSubject = subjectName; 
+
+            document.getElementById('currentSubject').textContent = subjectName; 
+
+        } 
+
+ 
+
+        function setTimer(minutes) { 
+
+            timerState.minutes = minutes; 
+
+            timerState.seconds = 0; 
+
+            timerState.totalSeconds = minutes * 60; 
+
+            updateTimerDisplay(); 
+
+            updateProgressRing(); 
+
+        } 
+
+ 
+
+        function startTimer() { 
+
+            if (!timerState.currentSubject) { 
+
+                alert('Select a subject first'); 
+
+                return; 
+
+            } 
+
+             
+
+            timerState.isRunning = true; 
+
+            document.getElementById('startBtn').classList.add('hidden'); 
+
+            document.getElementById('pauseBtn').classList.remove('hidden'); 
+
+             
+
+            timerState.interval = setInterval(() => { 
+
+                if (timerState.seconds === 0) { 
+
+                    if (timerState.minutes === 0) { 
+
+                        completeSession(); 
+
+                        return; 
+
+                    } 
+
+                    timerState.minutes--; 
+
+                    timerState.seconds = 59; 
+
+                } else { 
+
+                    timerState.seconds--; 
+
+                } 
+
+                 
+
+                updateTimerDisplay(); 
+
+                updateProgressRing(); 
+
+            }, 1000); 
+
+        } 
+
+ 
+
+        function pauseTimer() { 
+
+            timerState.isRunning = false; 
+
+            clearInterval(timerState.interval); 
+
+            document.getElementById('startBtn').classList.remove('hidden'); 
+
+            document.getElementById('pauseBtn').classList.add('hidden'); 
+
+        } 
+
+ 
+
+        function resetTimer() { 
+
+            pauseTimer(); 
+
+            setTimer(25); 
+
+        } 
+
+ 
+
+        function updateTimerDisplay() { 
+
+            const mins = String(timerState.minutes).padStart(2, '0'); 
+
+            const secs = String(timerState.seconds).padStart(2, '0'); 
+
+            document.getElementById('timerDisplay').textContent = `${mins}:${secs}`; 
+
+        } 
+
+ 
+
+        function updateProgressRing() { 
+
+            const elapsed = timerState.totalSeconds - (timerState.minutes * 60 + timerState.seconds); 
+
+            const percentage = elapsed / timerState.totalSeconds; 
+
+            const circumference = 2 * Math.PI * 140; 
+
+            const offset = circumference * (1 - percentage); 
+
+             
+
+            document.getElementById('progressCircle').style.strokeDashoffset = offset; 
+
+        } 
+
+ 
+
+        function completeSession() { 
+
+            pauseTimer(); 
+
+            timerState.sessionsToday++; 
+
+            timerState.totalMinutesToday += Math.floor(timerState.totalSeconds / 60); 
+
+             
+
+            document.getElementById('sessionCount').textContent = timerState.sessionsToday; 
+
+            document.getElementById('totalMinutes').textContent = timerState.totalMinutesToday; 
+
+             
+
+            localStorage.setItem('pomodoroState', JSON.stringify({ 
+
+                sessionsToday: timerState.sessionsToday, 
+
+                totalMinutesToday: timerState.totalMinutesToday, 
+
+                date: new Date().toDateString() 
+
+            })); 
+
+             
+
+            alert(`🎉 Session complete! Great work on ${timerState.currentSubject}!`); 
+
+            resetTimer(); 
+
+        } 
+
+ 
+
+        // ==================== Tab Switching ==================== 
+
+        function switchTab(tabName, event) { 
+
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden')); 
+
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active')); 
+
+             
+
+            const tabMap = { 
+
+                'overview': 'overviewTab', 
+
+                'planner': 'plannerTab', 
+
+                'schedule': 'scheduleTab', 
+
+                'focus': 'focusTab' 
+
+            }; 
+
+             
+
+            document.getElementById(tabMap[tabName]).classList.remove('hidden'); 
+
+            if (event && event.target) { 
+
+                event.target.classList.add('active'); 
+
+            } 
+
+             
+
+            gsap.from(`#${tabMap[tabName]}`, { 
+
+                opacity: 0, 
+
+                y: 20, 
+
+                duration: 0.4 
+
+            }); 
+
+        } 
+
+ 
+
+        // ==================== Local Storage ==================== 
+
+        function saveUserData() { 
+
+            const storageKey = `engimind_${userData.email}`; 
+
+            localStorage.setItem(storageKey, JSON.stringify(userData)); 
+
+        } 
+
+ 
+
+        function saveProgress() { 
+
+            saveUserData(); 
+
+            showSaveIndicator(); 
+
+        } 
+
+ 
+
+        function showSaveIndicator(message = 'Progress Saved Successfully') { 
+
+            const indicator = document.getElementById('saveIndicator'); 
+
+            indicator.textContent = '✓ ' + message; 
+
+            indicator.classList.add('show'); 
+
+            setTimeout(() => { 
+
+                indicator.classList.remove('show'); 
+
+            }, 2000); 
+
+        } 
+
+ 
+
+        // ==================== Initialization ==================== 
+
+        window.addEventListener('DOMContentLoaded', () => { 
+
+            initThreeJS(); 
+
+             
+
+            const session = localStorage.getItem('engimind_session'); 
+
+            const lastEmail = localStorage.getItem('engimind_lastEmail'); 
+
+             
+
+            if (session === 'active' && lastEmail) { 
+
+                const savedData = localStorage.getItem(`engimind_${lastEmail}`); 
+
+                if (savedData) { 
+
+                    userData = JSON.parse(savedData); 
+
+                    document.getElementById('loginScreen').classList.add('hidden'); 
+
+                    document.getElementById('mainDashboard').classList.remove('hidden'); 
+
+                    initializeDashboard(); 
+
+                } 
+
+            } 
+
+             
+
+            const circumference = 2 * Math.PI * 140; 
+
+            document.getElementById('progressCircle').style.strokeDasharray = circumference; 
+
+            document.getElementById('progressCircle').style.strokeDashoffset = circumference; 
+
+        }); 
+
+    </script> 
+
+</body> 
+
+</html> 
