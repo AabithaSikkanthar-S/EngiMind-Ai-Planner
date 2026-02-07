@@ -2,9 +2,6 @@
 EngiMind AI - A futuristic, AI-powered adaptive study planner designed for engineering students to balance cognitive load, manage subject prerequisites, and optimize study hours with a 3D immersive interface.
 🚀 EngiMind AI: Adaptive Engineering Study Planner
 EngiMind AI is an intelligent academic assistant built specifically for the demanding environment of engineering coursework. Traditional tools fail to adapt to dynamic priorities; EngiMind AI solves this by analyzing credits, difficulty, and individual confidence levels to create a personalized study path.  
-🎥 Live Demo & Preview
-Mandatory Demo Video: > Add your screen-recording video link here (or drag and drop the video file into this README)
-Live Hosted Link: 
 ✨ Key Features
 Dynamic Subject Management: Add or remove subjects like Data Structures, Operating Systems, and Mathematics on the fly.
 Weighted Priority Logic: Automatically calculates study priority based on subject credits and user confidence levels (1-5).
